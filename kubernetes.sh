@@ -9,7 +9,16 @@ firewall-cmd --permanent --add-port=10255/tcp
 firewall-cmd –reload
 modprobe br_netfilter
 echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
-cp kubernetes.repo /etc/yum.repos.d/
+#cp kubernetes.repo /etc/yum.repos.d/
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
 yum install kubeadm docker -y
 systemctl enable kubelet
 systemctl start kubelet
