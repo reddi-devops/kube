@@ -1,8 +1,10 @@
 #!/bin/bash
 setenforce 0
+echo "Disabling firewall"
 sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 systemctl stop firewalld
 systemct disable firewalld
+echo "Firewall stopped"
 #firewall-cmd --permanent --add-port=6443/tcp
 #firewall-cmd --permanent --add-port=2379-2380/tcp
 #firewall-cmd --permanent --add-port=10250/tcp
@@ -13,6 +15,7 @@ systemct disable firewalld
 modprobe br_netfilter
 echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 #cp kubernetes.repo /etc/yum.repos.d/
+echo "Creating kubernetes repo"
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -22,13 +25,15 @@ gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
+echo "Installing Kubernetes"
 yum install kubeadm docker -y
 systemctl enable kubelet
 systemctl start kubelet
 systemctl enable docker
 systemctl start docker
-kubeadm init &
-slepp 50
+echo " Initiating kubernetes cluster"
+kubeadm init 
+sleep 100
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
